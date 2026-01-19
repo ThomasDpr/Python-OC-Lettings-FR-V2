@@ -6,3 +6,4 @@ sentry-sdk==2.49.0
 python-dotenv
 six
 gunicorn>=21.2
+whitenoise
