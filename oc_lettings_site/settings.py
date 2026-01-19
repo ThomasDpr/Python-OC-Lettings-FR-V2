@@ -1,7 +1,26 @@
+"""
+Django settings module for the oc_lettings_site project.
+
+This module contains all Django configuration settings including
+database, installed apps, middleware, templates, static files,
+internationalization, and security settings.
+
+For more information on Django settings, see:
+https://docs.djangoproject.com/en/3.0/topics/settings/
+
+For the full list of settings and their values, see:
+https://docs.djangoproject.com/en/3.0/ref/settings/
+"""
+
 import os
+from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from pathlib import Path
 
+load_dotenv()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -15,7 +34,7 @@ SECRET_KEY = 'fp$9^593hsriajg$_%=5trot9g!1qa@ew(o-1#@=&4%=hp46(s'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -113,4 +132,32 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static",]
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+
+# sentry_sdk.init(
+#     dsn=os.environ.get("SENTRY_DSN"),
+#     integrations=[DjangoIntegration()],
+#     traces_sample_rate=1.0,
+#     send_default_pii=True,
+# )
+
+# import sentry_sdk
+
+sentry_logging = LoggingIntegration(
+    level=None,          # capture all logs >= DEBUG
+    event_level="ERROR"  # Envoie les ERROR comme événements Sentry
+)
+
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            sentry_logging,
+        ],
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+    )
