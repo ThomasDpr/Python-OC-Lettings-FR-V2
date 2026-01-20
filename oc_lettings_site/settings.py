@@ -155,4 +155,4 @@ if SENTRY_DSN:
         send_default_pii=True,
     )
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
