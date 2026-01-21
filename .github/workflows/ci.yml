@@ -57,6 +57,7 @@ jobs:
   docker:
     needs: tests
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout repository
@@ -68,10 +69,28 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
+      - name: Build and push Docker image
         run: |
-          docker build -t thomasdpr/oc-lettings-prod:latest .
-
-      - name: Push Docker image
-        run: |
+          docker build -t thomasdpr/oc-lettings-prod:latest \
+                       -t thomasdpr/oc-lettings-prod:${{ github.sha }} .
           docker push thomasdpr/oc-lettings-prod:latest
+          docker push thomasdpr/oc-lettings-prod:${{ github.sha }}
+
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Deploy to Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          echo "🚀 Triggering deployment on Render..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK_URL")
+          if [ $response -eq 200 ] || [ $response -eq 201 ]; then
+            echo "✅ Deployment triggered successfully!"
+          else
+            echo "❌ Deployment failed with status code: $response"
+            exit 1
+          fi
