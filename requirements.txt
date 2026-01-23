@@ -7,3 +7,5 @@ python-dotenv
 six
 gunicorn>=21.2
 whitenoise
+sphinx>=4.0.0
+sphinx-rtd-theme>=1.0.0
